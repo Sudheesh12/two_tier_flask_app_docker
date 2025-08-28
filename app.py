@@ -13,6 +13,19 @@ app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB', 'default_db')
 # Initialize MySQL
 mysql = MySQL(app)
 
+# Create table if not exists on startup
+@app.before_first_request
+def create_table():
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS messages (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            message VARCHAR(255) NOT NULL
+        )
+    """)
+    mysql.connection.commit()
+    cur.close()
+
 @app.route('/')
 def hello():
     cur = mysql.connection.cursor()
@@ -32,4 +45,3 @@ def submit():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-
